@@ -1,0 +1,42 @@
+# Blueprint de Render para el backend Mantelek.
+# Importa este repo en Render → "New +" → "Blueprint".
+# Nota: el disco persistente requiere un plan de pago (Starter+). En plan free
+# los archivos subidos se pierden en cada redeploy.
+
+databases:
+  - name: mantelek-db
+    databaseName: mantelek
+    user: mantelek
+    plan: free # el Postgres free de Render expira a los 30 días
+
+services:
+  - type: web
+    name: mantelek-api
+    runtime: node
+    rootDir: server
+    plan: starter # necesario para el disco persistente
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: uploads
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mantelek-db
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "false" # conexión interna de Render; ponlo "true" si usas una URL externa
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: MAX_UPLOAD_MB
+        value: "15"
+      # Ajusta esto a la URL de tu frontend en Vercel tras desplegarlo:
+      - key: CLIENT_ORIGIN
+        sync: false
