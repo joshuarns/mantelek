@@ -16,9 +16,11 @@ export const config = {
   databaseSsl: process.env.DATABASE_SSL === 'true',
   port: Number(process.env.PORT ?? 4000),
   // Uno o varios orígenes permitidos por CORS, separados por coma.
+  // Se normaliza quitando espacios y la barra final: el header `Origin` del
+  // navegador nunca la lleva, así que "https://app.com/" nunca casaría.
   clientOrigin: (process.env.CLIENT_ORIGIN ?? 'http://localhost:5173')
     .split(',')
-    .map((o) => o.trim())
+    .map((o) => o.trim().replace(/\/+$/, ''))
     .filter(Boolean),
   jwtSecret: process.env.JWT_SECRET ?? 'dev-secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
