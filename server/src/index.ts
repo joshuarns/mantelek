@@ -13,7 +13,13 @@ const app = express()
 app.use(cors({ origin: config.clientOrigin }))
 app.use(express.json())
 
-app.get('/api/health', (_req, res) => res.json({ ok: true }))
+// Healthcheck. Se responde también en "/" porque algunos proveedores
+// (Railway, Render) sondean la raíz por defecto.
+const health = (_req: Request, res: Response) =>
+  res.json({ ok: true, service: 'mantelek-api' })
+app.get('/', health)
+app.get('/api/health', health)
+
 app.use('/api/auth', authRouter)
 app.use('/api/me', meRouter)
 app.use('/api/documents', documentsRouter)
