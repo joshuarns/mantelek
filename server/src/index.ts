@@ -41,8 +41,22 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: 'Error interno del servidor' })
 })
 
-const server = app.listen(config.port, () => {
-  console.log(`Mantelek API escuchando en http://localhost:${config.port}`)
+// Diagnóstico de arranque (sin secretos), útil en los logs del proveedor.
+console.log('[boot] puerto:', config.port)
+console.log('[boot] uploads:', config.uploadDir)
+console.log('[boot] CORS:', config.clientOrigin.join(', '))
+console.log('[boot] Postgres SSL:', config.databaseSsl)
+
+// Enlazar a 0.0.0.0 (no solo localhost) para que el healthcheck del
+// proveedor pueda alcanzar el contenedor.
+const server = app.listen(config.port, '0.0.0.0', () => {
+  console.log(`Mantelek API escuchando en 0.0.0.0:${config.port}`)
+})
+
+// Un error al enlazar (puerto ocupado, permisos) debe verse en el log.
+server.on('error', (err) => {
+  console.error('[fatal] No se pudo enlazar el servidor:', err)
+  process.exit(1)
 })
 
 // Apagado ordenado: cierra el servidor y el pool para que el reinicio
