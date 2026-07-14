@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Eye } from 'lucide-react'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Loading, ErrorState } from '../../components/ui/States'
@@ -39,12 +40,13 @@ export function HistorialCumplimiento() {
                   <td className="px-5 py-3.5 text-slate-600">{formatDate(r.completedAt)}</td>
                   <td className="px-5 py-3.5">
                     <div className="flex justify-end">
-                      <button
+                      <Link
+                        to={`/historial/${r.period}`}
                         className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-600"
                         title="Ver expediente"
                       >
                         <Eye size={16} />
-                      </button>
+                      </Link>
                     </div>
                   </td>
                 </tr>

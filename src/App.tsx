@@ -8,6 +8,7 @@ import { InformacionGeneral } from './pages/client/InformacionGeneral'
 import { DocumentosDelMes } from './pages/client/DocumentosDelMes'
 import { VistaDocumento } from './pages/client/VistaDocumento'
 import { HistorialCumplimiento } from './pages/client/HistorialCumplimiento'
+import { ExpedienteMes } from './pages/client/ExpedienteMes'
 import { Notificaciones } from './pages/client/Notificaciones'
 import { Soporte } from './pages/client/Soporte'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
@@ -29,6 +30,7 @@ function App() {
             <Route path="documentos" element={<DocumentosDelMes />} />
             <Route path="documentos/:type" element={<VistaDocumento />} />
             <Route path="historial" element={<HistorialCumplimiento />} />
+            <Route path="historial/:period" element={<ExpedienteMes />} />
             <Route path="notificaciones" element={<Notificaciones />} />
             <Route path="soporte" element={<Soporte />} />
           </Route>

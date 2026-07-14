@@ -33,6 +33,11 @@ const ALL_DOCS: (DocumentDef & { appliesTo: PersonType[] })[] = [
   { type: 'otros', label: 'Otros Documentos', appliesTo: ['fisica', 'moral'] },
 ]
 
+/** Catálogo completo, para filtros del panel administrativo. */
+export function allDocuments(): DocumentDef[] {
+  return ALL_DOCS.map(({ type, label }) => ({ type, label }))
+}
+
 /** Documentos requeridos para un tipo de persona (Módulo 2). */
 export function requiredDocuments(personType: PersonType): DocumentDef[] {
   return ALL_DOCS.filter((d) => d.appliesTo.includes(personType)).map(

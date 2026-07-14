@@ -337,8 +337,17 @@ adminRouter.get(
 adminRouter.get(
   '/download',
   asyncHandler(async (req, res) => {
-    const clientId = typeof req.query.clientId === 'string' ? req.query.clientId : undefined
-    const period = typeof req.query.period === 'string' ? req.query.period : undefined
+    /** Lee un parámetro que puede venir repetido o separado por comas. */
+    const list = (v: unknown): string[] | null => {
+      const raw = Array.isArray(v) ? v.join(',') : typeof v === 'string' ? v : ''
+      const items = raw.split(',').map((s) => s.trim()).filter(Boolean)
+      return items.length ? items : null
+    }
+
+    // clientId (uno) y clientIds (varios) conviven: el segundo es el general.
+    const clientIds = list(req.query.clientIds) ?? list(req.query.clientId)
+    const period = typeof req.query.period === 'string' && req.query.period ? req.query.period : null
+    const types = list(req.query.types) // filtro por tipo de documento
 
     const { rows } = await query<{
       client_name: string
@@ -352,10 +361,11 @@ adminRouter.get(
        JOIN monthly_records r ON r.id = d.record_id
        JOIN clients c ON c.id = r.client_id
        WHERE d.status = 'cargado' AND d.file_path IS NOT NULL
-         AND ($1::uuid IS NULL OR c.id = $1)
+         AND ($1::uuid[] IS NULL OR c.id = ANY($1))
          AND ($2::text IS NULL OR r.period = $2)
+         AND ($3::text[] IS NULL OR d.type = ANY($3))
        ORDER BY c.name, r.period, d.type`,
-      [clientId ?? null, period ?? null],
+      [clientIds, period, types],
     )
 
     const available = rows.filter((r) => r.file_path && fs.existsSync(r.file_path))
@@ -382,10 +392,12 @@ adminRouter.get(
     }
 
     // metadata útil para el área de contabilidad
+    const clientNames = [...new Set(available.map((d) => d.client_name))]
     archive.append(
       `Paquete generado: ${new Date().toISOString()}\n` +
-        `Cliente: ${clientId ? available[0].client_name : 'Todos'}\n` +
+        `Clientes (${clientNames.length}): ${clientIds ? clientNames.join(', ') : 'Todos'}\n` +
         `Periodo: ${period ? periodLabel(period) : 'Todos'}\n` +
+        `Tipos de documento: ${types ? types.join(', ') : 'Todos'}\n` +
         `Documentos: ${available.length}\n`,
       { name: 'Mantelek_Documentos/README.txt' },
     )
