@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   Users,
@@ -8,6 +9,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Menu,
+  X,
 } from 'lucide-react'
 import { Logo } from '../Logo'
 import { useAuth } from '../../lib/auth'
@@ -24,11 +27,35 @@ const NAV = [
 
 export function AdminLayout() {
   const { user, logout } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => setMenuOpen(false), [location.pathname])
+
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <aside className="hidden w-60 shrink-0 flex-col bg-brand-950 p-4 md:flex">
-        <div className="px-2 py-3">
+      {menuOpen && (
+        <button
+          aria-label="Cerrar menú"
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col bg-brand-950 p-4 transition-transform duration-200 md:static md:z-auto md:translate-x-0 ${
+          menuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between px-2 py-3">
           <Logo subtitle="Admin" />
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="text-slate-400 hover:text-white md:hidden"
+            aria-label="Cerrar menú"
+          >
+            <X size={20} />
+          </button>
         </div>
         <nav className="mt-4 flex flex-col gap-1">
           {NAV.map(({ to, label, icon: Icon, end }) => (
@@ -52,8 +79,15 @@ export function AdminLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-end gap-3 border-b border-slate-200 bg-white px-6 py-3">
-          <div className="text-right leading-tight">
+        <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 md:hidden"
+            aria-label="Abrir menú"
+          >
+            <Menu size={20} />
+          </button>
+          <div className="ml-auto text-right leading-tight">
             <p className="text-sm font-semibold text-slate-800">{user?.fullName ?? 'Mantelek'}</p>
             <p className="text-xs text-slate-500">Administrador</p>
           </div>
@@ -69,7 +103,7 @@ export function AdminLayout() {
           </button>
         </header>
 
-        <main className="flex-1 overflow-x-hidden p-6">
+        <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

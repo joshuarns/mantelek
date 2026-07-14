@@ -51,6 +51,13 @@ export const api = {
       body: body ? JSON.stringify(body) : undefined,
     }).then(parse),
 
+  patch: <T>(path: string, body?: unknown): Promise<T> =>
+    fetch(`${BASE}${path}`, {
+      method: 'PATCH',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: body ? JSON.stringify(body) : undefined,
+    }).then(parse),
+
   del: <T>(path: string): Promise<T> =>
     fetch(`${BASE}${path}`, { method: 'DELETE', headers: authHeaders() }).then(parse),
 

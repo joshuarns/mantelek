@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Download, MoreVertical, Search } from 'lucide-react'
 import { StatCard } from '../../components/ui/StatCard'
 import { StatusBadge } from '../../components/ui/StatusBadge'
@@ -20,6 +21,7 @@ export function AdminDashboard() {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<ComplianceStatus | 'todos'>('todos')
   const [type, setType] = useState<PersonType | 'todos'>('todos')
+  const [exportError, setExportError] = useState<string | null>(null)
 
   const rows = useMemo(() => {
     return (clients.data ?? []).filter((c) => {
@@ -46,6 +48,10 @@ export function AdminDashboard() {
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold text-slate-900">Dashboard de Cumplimiento</h1>
+
+      {exportError && (
+        <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{exportError}</div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {kpis.map((k) => (
@@ -86,7 +92,13 @@ export function AdminDashboard() {
             />
           </div>
           <button
-            onClick={() => api.download('/admin/download', 'Mantelek_Documentos.zip')}
+            onClick={() =>
+              api
+                .download('/admin/download', 'Mantelek_Documentos.zip')
+                .catch((err) =>
+                  setExportError(err instanceof Error ? err.message : 'No se pudo exportar'),
+                )
+            }
             className="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-600"
           >
             <Download size={15} /> Exportar
@@ -134,7 +146,17 @@ export function AdminDashboard() {
               {rows.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                    No hay clientes que coincidan con los filtros.
+                    {(clients.data ?? []).length === 0 ? (
+                      <>
+                        Aún no hay clientes.{' '}
+                        <Link to="/admin/clientes" className="font-medium text-brand-600 hover:underline">
+                          Da de alta el primero
+                        </Link>
+                        .
+                      </>
+                    ) : (
+                      'No hay clientes que coincidan con los filtros.'
+                    )}
                   </td>
                 </tr>
               )}

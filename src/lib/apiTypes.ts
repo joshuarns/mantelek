@@ -69,9 +69,29 @@ export interface AdminClient {
   rfc: string
   email: string | null
   adminContact: string | null
+  active: boolean
+  /** Correo con el que el cliente entra al portal. */
+  userEmail: string | null
   status: ComplianceStatus
   progress: number
   pending: number
   lastAccessAt: string | null
   lastUploadAt: string | null
+}
+
+/** Datos del formulario de alta/edición de cliente. */
+export interface ClientInput {
+  name: string
+  personType: PersonType
+  rfc: string
+  taxRegime: string
+  taxAddress: string
+  phone: string
+  email: string
+  adminContact: string
+  bank: { bank: string; account: string; clabe: string }
+}
+
+export interface CreateClientInput extends ClientInput {
+  user: { email: string; password: string; fullName: string }
 }

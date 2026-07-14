@@ -90,11 +90,9 @@ export function Login() {
             {loading ? 'Entrando…' : 'Entrar'}
           </button>
 
-          <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-            <p className="font-medium text-slate-600">Credenciales de demo</p>
-            <p className="mt-1">Cliente: juan@soluciones.com / demo1234</p>
-            <p>Admin: admin@mantelek.com / admin1234</p>
-          </div>
+          <p className="mt-4 text-center text-xs text-slate-400">
+            ¿Problemas para entrar? Escríbenos a soporte@mantelek.com
+          </p>
         </form>
       </div>
     </div>

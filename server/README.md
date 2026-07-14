@@ -27,28 +27,25 @@ psql -d postgres -c "CREATE DATABASE mantelek OWNER mantelek;"
 cd server
 cp .env.example .env      # ya existe uno con valores de desarrollo
 npm install
-npm run reset             # aplica el esquema + siembra datos de demo
+npm run migrate           # aplica el esquema (¡recrea las tablas!)
+npm run create-admin -- tu@correo.com "TuContraseña" "Tu Nombre"
 npm run dev               # API en http://localhost:4000
 ```
 
 Scripts:
 
-| Script            | Acción                                   |
-| ----------------- | ---------------------------------------- |
-| `npm run dev`     | Servidor con recarga (tsx watch)         |
-| `npm run migrate` | Aplica `src/db/schema.sql`               |
-| `npm run seed`    | Siembra clientes/usuarios de demo        |
-| `npm run reset`   | migrate + seed                           |
-| `npm run build`   | Compila a `dist/`                        |
-| `npm start`       | Ejecuta la build de producción           |
+| Script                 | Acción                                            |
+| ---------------------- | ------------------------------------------------- |
+| `npm run dev`          | Servidor con recarga (tsx watch)                  |
+| `npm run migrate`      | Aplica `src/db/schema.sql` (**destructivo**)      |
+| `npm run create-admin` | Crea/actualiza un usuario administrador           |
+| `npm run build`        | Compila a `dist/`                                 |
+| `npm start`            | Ejecuta la build de producción                    |
 
-## Credenciales de demo
+## Primer acceso
 
-| Rol     | Correo                  | Contraseña  |
-| ------- | ----------------------- | ----------- |
-| Cliente | `juan@soluciones.com`   | `demo1234`  |
-| Cliente | `maria@correo.com`      | `demo1234`  |
-| Admin   | `admin@mantelek.com`    | `admin1234` |
+No hay datos de demo. Crea el administrador con `create-admin` y desde el panel
+(**Clientes → Nuevo cliente**) das de alta cada cliente junto con su usuario de acceso.
 
 ## Endpoints
 
@@ -70,7 +67,12 @@ Autenticación con `Authorization: Bearer <token>`.
 
 ### Administración (`/api/admin`, solo rol admin)
 - `GET /api/admin/stats` — KPIs del semáforo (Módulos 7 y 8)
-- `GET /api/admin/clients?period=YYYY-MM` — cartera con estatus y avance
+- `GET /api/admin/clients?period=YYYY-MM&inactivos=1` — cartera con estatus y avance
+- `POST /api/admin/clients` — alta de cliente + su usuario de acceso
+- `PUT /api/admin/clients/:id` — editar datos del cliente
+- `PATCH /api/admin/clients/:id/active` — activar / desactivar (bloquea su acceso)
+- `PATCH /api/admin/clients/:id/password` — cambiar la contraseña del cliente
+- `DELETE /api/admin/clients/:id` — eliminar cliente, expediente y archivos
 - `GET /api/admin/download?clientId=&period=` — ZIP para auditorías/SAT (Módulo 10)
 
 ## Notas de arquitectura

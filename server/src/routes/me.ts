@@ -9,7 +9,7 @@ import {
   getDocuments,
   serializeRecord,
 } from '../services/records.js'
-import { CURRENT_PERIOD, DEADLINE_DAY, periodLabel } from '../lib/period.js'
+import { currentPeriod, DEADLINE_DAY, periodLabel } from '../lib/period.js'
 
 export const meRouter = Router()
 meRouter.use(requireAuth)
@@ -29,12 +29,13 @@ meRouter.get(
     const client = await getClient(id)
     if (!client) return res.status(404).json({ error: 'Cliente no encontrado' })
 
-    const record = await ensureRecord(id, CURRENT_PERIOD, client.person_type)
+    const period = currentPeriod()
+    const record = await ensureRecord(id, period, client.person_type)
     const docs = await getDocuments(record.id)
 
     res.json({
       client: serializeClient(client),
-      currentPeriod: CURRENT_PERIOD,
+      currentPeriod: period,
       deadlineDay: DEADLINE_DAY,
       currentRecord: serializeRecord(record, docs),
     })

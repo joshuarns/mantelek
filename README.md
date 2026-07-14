@@ -15,7 +15,8 @@ semáforo de cumplimiento y descarga en .zip para auditorías/SAT.
 brew services start postgresql@16   # si no está corriendo
 cd server
 npm install
-npm run reset                        # esquema + datos de demo (solo la primera vez)
+npm run migrate                      # crea las tablas (solo la primera vez)
+npm run create-admin -- tu@correo.com "TuContraseña" "Tu Nombre"
 npm run dev                          # API en http://localhost:4000
 ```
 
@@ -28,13 +29,16 @@ npm run dev                          # app en http://localhost:5173
 
 El frontend redirige `/api/*` al backend (proxy de Vite), así que no hay que configurar CORS en dev.
 
-## Credenciales de demo
+## Primer acceso
 
-| Rol     | Correo                | Contraseña  |
-| ------- | --------------------- | ----------- |
-| Cliente | `juan@soluciones.com` | `demo1234`  |
-| Cliente | `maria@correo.com`    | `demo1234`  |
-| Admin   | `admin@mantelek.com`  | `admin1234` |
+No hay datos de demo. El flujo real es:
+
+1. Creas tu usuario **administrador** con `npm run create-admin` (arriba).
+2. Entras al portal con ese correo y contraseña → vas a `/admin`.
+3. En **Clientes → Nuevo cliente** das de alta cada cliente/proveedor. Al crearlo se
+   genera también su **usuario de acceso** (correo + contraseña) que le compartes.
+4. El cliente entra con esas credenciales y ve su expediente del mes en curso,
+   generado automáticamente según su tipo de persona (Física o Moral).
 
 ## Estructura
 

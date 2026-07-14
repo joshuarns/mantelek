@@ -18,6 +18,7 @@ interface UserRow {
   password_hash: string
   full_name: string
   role: 'client' | 'admin'
+  client_active: boolean | null
 }
 
 authRouter.post(
@@ -30,12 +31,19 @@ authRouter.post(
     const { email, password } = parsed.data
 
     const { rows } = await query<UserRow>(
-      'SELECT id, client_id, email, password_hash, full_name, role FROM users WHERE lower(email) = lower($1)',
+      `SELECT u.id, u.client_id, u.email, u.password_hash, u.full_name, u.role,
+              c.active AS client_active
+       FROM users u
+       LEFT JOIN clients c ON c.id = u.client_id
+       WHERE lower(u.email) = lower($1)`,
       [email],
     )
     const user = rows[0]
     if (!user || !(await verifyPassword(password, user.password_hash))) {
       return res.status(401).json({ error: 'Credenciales incorrectas' })
+    }
+    if (user.client_id && user.client_active === false) {
+      return res.status(403).json({ error: 'Esta cuenta está desactivada. Contacta a Mantelek.' })
     }
 
     // Registrar último acceso del cliente.

@@ -64,12 +64,15 @@ Render: *Shell*) dentro de `server/` y ejecuta:
 
 ```bash
 npm run migrate   # crea las tablas (¡recrea el esquema, borra datos!)
-npm run seed      # opcional: datos de demo
+npm run create-admin -- tu@correo.com "TuContraseña" "Tu Nombre"
 ```
 
-> **Importante:** `migrate` y `seed` son destructivos (el esquema hace `DROP TABLE`).
-> Ejecútalos solo en el setup inicial, nunca en cada deploy. El `startCommand` de
-> producción es solo `npm start`, así que no se corren automáticamente.
+> **Importante:** `migrate` es destructivo (el esquema hace `DROP TABLE`).
+> Ejecútalo solo en el setup inicial, nunca en cada deploy. El `startCommand` de
+> producción es solo `npm start`, así que no se corre automáticamente.
+
+Después entras al portal con ese admin y das de alta los clientes desde
+**Clientes → Nuevo cliente**.
 
 Anota la URL pública del backend, p. ej. `https://mantelek-api.up.railway.app`.
 

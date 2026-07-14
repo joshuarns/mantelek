@@ -2,6 +2,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import cors from 'cors'
 import multer from 'multer'
 import { config } from './config.js'
+import { pool } from './db/pool.js'
 import { authRouter } from './routes/auth.js'
 import { meRouter } from './routes/me.js'
 import { documentsRouter } from './routes/documents.js'
@@ -34,6 +35,18 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: 'Error interno del servidor' })
 })
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`Mantelek API escuchando en http://localhost:${config.port}`)
 })
+
+// Apagado ordenado: cierra el servidor y el pool para que el reinicio
+// (tsx watch / redeploy) sea limpio y no quede el puerto ocupado.
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+  process.on(signal, () => {
+    server.close(() => {
+      pool.end().finally(() => process.exit(0))
+    })
+    // Salida forzada si algo no cierra en 3s.
+    setTimeout(() => process.exit(0), 3000).unref()
+  })
+}

@@ -25,6 +25,7 @@ CREATE TABLE clients (
   constancia_updated_at TIMESTAMPTZ,
   last_access_at      TIMESTAMPTZ,
   last_upload_at      TIMESTAMPTZ,
+  active              BOOLEAN NOT NULL DEFAULT true,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

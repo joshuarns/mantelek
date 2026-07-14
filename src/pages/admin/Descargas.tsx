@@ -32,6 +32,21 @@ export function Descargas() {
   if (error || !data)
     return <ErrorState message={error ?? 'No se pudo cargar'} onRetry={refetch} />
 
+  if (data.length === 0) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <h1 className="text-2xl font-bold text-slate-900">Descarga de Documentación</h1>
+        <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <p className="font-medium text-slate-700">Aún no hay clientes</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Da de alta clientes en la sección <strong>Clientes</strong> para poder descargar su
+            documentación.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   const selected = data.find((c) => c.id === clientId) ?? data[0]
   const includes = selected ? requiredDocuments(selected.personType) : []
 
