@@ -5,6 +5,7 @@ import { useFetch } from '../../hooks/useFetch'
 import { api } from '../../lib/api'
 import { allDocuments } from '../../lib/documents'
 import { periodLabel } from '../../lib/format'
+import { recentPeriods } from '../../lib/periods'
 import type { AdminClient } from '../../lib/apiTypes'
 
 type Mode = 'cliente' | 'mes' | 'cliente_mes' | 'varios'
@@ -15,17 +16,6 @@ const TABS: { id: Mode; label: string }[] = [
   { id: 'cliente_mes', label: 'Por Cliente y Mes' },
   { id: 'varios', label: 'Varios Clientes' },
 ]
-
-/** Últimos 12 periodos, del más reciente al más antiguo. */
-function recentPeriods(): string[] {
-  const out: string[] = []
-  const now = new Date()
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
-  }
-  return out
-}
 
 const DOC_TYPES = allDocuments()
 const PERIODS = recentPeriods()

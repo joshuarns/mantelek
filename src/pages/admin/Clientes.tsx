@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { KeyRound, Pencil, Plus, Power, Trash2, UserPlus, Users } from 'lucide-react'
+import { FileSearch, KeyRound, Pencil, Plus, Power, Trash2, UserPlus, Users } from 'lucide-react'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Loading, ErrorState } from '../../components/ui/States'
 import { ClientForm } from '../../components/admin/ClientForm'
+import { ClientDetail } from '../../components/admin/ClientDetail'
 import { useFetch } from '../../hooks/useFetch'
 import { api } from '../../lib/api'
 import { formatDate } from '../../lib/format'
@@ -15,6 +16,7 @@ export function Clientes() {
   )
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<AdminClient | null>(null)
+  const [detail, setDetail] = useState<AdminClient | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -141,6 +143,12 @@ export function Clientes() {
 
               <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
                 <button
+                  onClick={() => setDetail(c)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <FileSearch size={14} /> Ficha
+                </button>
+                <button
                   onClick={() => setEditing(c)}
                   disabled={busy === c.id}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
@@ -178,6 +186,7 @@ export function Clientes() {
       {editing && (
         <ClientForm client={editing} onClose={() => setEditing(null)} onSaved={refetch} />
       )}
+      {detail && <ClientDetail client={detail} onClose={() => setDetail(null)} />}
     </div>
   )
 }

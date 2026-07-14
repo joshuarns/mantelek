@@ -8,6 +8,7 @@ import { authRouter } from './routes/auth.js'
 import { meRouter } from './routes/me.js'
 import { documentsRouter } from './routes/documents.js'
 import { adminRouter } from './routes/admin.js'
+import { adminViewsRouter } from './routes/adminViews.js'
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/me', meRouter)
 app.use('/api/documents', documentsRouter)
 app.use('/api/admin', adminRouter)
+app.use('/api/admin', adminViewsRouter)
 
 // 404 para rutas de API desconocidas
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Ruta no encontrada' }))

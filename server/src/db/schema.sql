@@ -91,3 +91,6 @@ CREATE INDEX IF NOT EXISTS idx_notifications_client ON notifications (client_id,
 
 -- Migraciones aditivas para bases creadas con versiones anteriores.
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT true;
+-- Observaciones internas de Mantelek sobre el cliente (Módulo 7).
+-- Solo las ve el personal administrativo, nunca el cliente.
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS notes TEXT;

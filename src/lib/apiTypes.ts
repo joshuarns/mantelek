@@ -93,6 +93,71 @@ export interface AdminClient {
   lastUploadAt: string | null
 }
 
+// --- Vistas del panel administrativo (Módulo 7) ---
+
+export interface ComplianceClient {
+  id: string
+  name: string
+  personType: PersonType
+  rfc: string
+  status: ComplianceStatus
+  progress: number
+  /** Etiquetas de los documentos obligatorios que le faltan. */
+  pending: string[]
+  lastUploadAt: string | null
+}
+
+export interface ComplianceResponse {
+  period: string
+  label: string
+  clients: ComplianceClient[]
+}
+
+export interface AdminDocument {
+  id: string
+  clientId: string
+  clientName: string
+  period: string
+  periodLabel: string
+  type: string
+  label: string
+  status: DocumentStatus
+  fileName: string | null
+  fileSize: string | null
+  uploadedAt: string | null
+  uploadedBy: string | null
+}
+
+export interface ReportsResponse {
+  period: string
+  label: string
+  trend: { period: string; label: string; cumplido: number; total: number; avgProgress: number }[]
+  bottlenecks: { label: string; pendientes: number }[]
+  byPersonType: { personType: PersonType; total: number; cumplido: number; avgProgress: number }[]
+}
+
+export interface AdminConfig {
+  deadlineDay: number
+  currentPeriod: string
+  documents: { type: string; label: string; appliesTo: PersonType[]; optional: boolean }[]
+  notifications: {
+    remindersEnabled: boolean
+    reminderDays: number[]
+    timezone: string
+    emailConfigured: boolean
+    mailFrom: string
+    whatsappEnabled: boolean
+  }
+  portalUrl: string
+}
+
+export interface AdminUser {
+  id: string
+  email: string
+  fullName: string
+  createdAt: string
+}
+
 /** Datos del formulario de alta/edición de cliente. */
 export interface ClientInput {
   name: string
