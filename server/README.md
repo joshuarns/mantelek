@@ -34,13 +34,27 @@ npm run dev               # API en http://localhost:4000
 
 Scripts:
 
-| Script                 | Acción                                            |
-| ---------------------- | ------------------------------------------------- |
-| `npm run dev`          | Servidor con recarga (tsx watch)                  |
-| `npm run migrate`      | Aplica `src/db/schema.sql` (**destructivo**)      |
-| `npm run create-admin` | Crea/actualiza un usuario administrador           |
-| `npm run build`        | Compila a `dist/`                                 |
-| `npm start`            | Ejecuta la build de producción                    |
+| Script                 | Acción                                                        |
+| ---------------------- | ------------------------------------------------------------- |
+| `npm run dev`          | Servidor con recarga (tsx watch)                              |
+| `npm run migrate`      | Aplica el esquema. **Aditivo y seguro**: no borra datos        |
+| `npm run create-admin` | Crea/actualiza un usuario administrador                       |
+| `npm run db:reset`     | ⚠️ **Destructivo**: borra todas las tablas (solo desarrollo)   |
+| `npm run build`        | Compila a `dist/`                                             |
+| `npm start`            | Ejecuta la build de producción                                |
+
+## Notificaciones (Módulo 5)
+
+Un cron dentro del servidor envía recordatorios por correo los **días 10, 15 y 20
+a las 09:00**, solo a los clientes con documentos obligatorios pendientes. Al llegar
+al 100% se envía el aviso de "expediente completado" y **dejan de enviarse recordatorios**.
+El día siguiente a la fecha límite, los expedientes incompletos pasan a `vencido`.
+
+Los envíos quedan en la tabla `notifications`, con `UNIQUE(cliente, periodo, tipo, canal)`:
+un mismo aviso **nunca se manda dos veces**.
+
+> Sin `RESEND_API_KEY` el sistema funciona igual, pero los recordatorios se registran
+> como `simulado` en vez de enviarse. Configura la key para que salgan de verdad.
 
 ## Primer acceso
 
@@ -74,6 +88,9 @@ Autenticación con `Authorization: Bearer <token>`.
 - `PATCH /api/admin/clients/:id/password` — cambiar la contraseña del cliente
 - `DELETE /api/admin/clients/:id` — eliminar cliente, expediente y archivos
 - `GET /api/admin/download?clientId=&period=` — ZIP para auditorías/SAT (Módulo 10)
+- `GET /api/admin/notifications` — bitácora de recordatorios enviados
+- `POST /api/admin/notifications/run` — `{ day: 10|15|20 }` dispara los recordatorios a mano
+- `POST /api/admin/notifications/overdue` — marca como `vencido` los expedientes incompletos
 
 ## Notas de arquitectura
 

@@ -7,6 +7,7 @@ import { asyncHandler } from '../lib/asyncHandler.js'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
 import { hashPassword } from '../lib/auth.js'
 import { currentPeriod, periodFolder, periodLabel } from '../lib/period.js'
+import { runOverdue, runReminders } from '../jobs/index.js'
 
 export const adminRouter = Router()
 adminRouter.use(requireAuth, requireAdmin)
@@ -281,6 +282,54 @@ adminRouter.delete(
       if (r.file_path && fs.existsSync(r.file_path)) fs.rmSync(r.file_path, { force: true })
     }
     res.json({ ok: true })
+  }),
+)
+
+// ---------------------------------------------------------------------------
+// Notificaciones (Módulo 5) — disparo manual y bitácora
+// ---------------------------------------------------------------------------
+
+// Envía los recordatorios de un día concreto sin esperar al cron.
+// Útil para probar y para reenviar si un día falló.
+adminRouter.post(
+  '/notifications/run',
+  asyncHandler(async (req, res) => {
+    const parsed = z
+      .object({
+        day: z.union([z.literal(10), z.literal(15), z.literal(20)]),
+        period: z.string().optional(),
+      })
+      .safeParse(req.body)
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Indica day: 10, 15 o 20' })
+    }
+    const result = await runReminders(parsed.data.day, parsed.data.period)
+    res.json(result)
+  }),
+)
+
+// Marca como vencidos los expedientes incompletos del periodo.
+adminRouter.post(
+  '/notifications/overdue',
+  asyncHandler(async (req, res) => {
+    const period = typeof req.body?.period === 'string' ? req.body.period : undefined
+    res.json(await runOverdue(period))
+  }),
+)
+
+// Bitácora de todo lo enviado.
+adminRouter.get(
+  '/notifications',
+  asyncHandler(async (_req, res) => {
+    const { rows } = await query(
+      `SELECT n.id, c.name AS client, n.period, n.kind, n.channel,
+              n.recipient, n.status, n.error, n.sent_at
+       FROM notifications n
+       JOIN clients c ON c.id = n.client_id
+       ORDER BY n.sent_at DESC
+       LIMIT 100`,
+    )
+    res.json(rows)
   }),
 )
 

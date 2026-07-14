@@ -139,6 +139,46 @@ meRouter.get(
   }),
 )
 
+// Recordatorios realmente enviados a este cliente (Módulo 5).
+meRouter.get(
+  '/notifications',
+  asyncHandler(async (req, res) => {
+    const id = clientId(req)
+    if (!id) return res.status(403).json({ error: 'Sin expediente de cliente' })
+
+    const { rows } = await query<{
+      id: string
+      period: string
+      kind: string
+      channel: string
+      subject: string | null
+      message: string
+      status: string
+      sent_at: string
+    }>(
+      `SELECT id, period, kind, channel, subject, message, status, sent_at
+       FROM notifications
+       WHERE client_id = $1 AND status <> 'error'
+       ORDER BY sent_at DESC
+       LIMIT 30`,
+      [id],
+    )
+
+    res.json(
+      rows.map((n) => ({
+        id: n.id,
+        period: n.period,
+        kind: n.kind,
+        channel: n.channel,
+        subject: n.subject,
+        message: n.message,
+        status: n.status,
+        sentAt: n.sent_at,
+      })),
+    )
+  }),
+)
+
 // Detalle de un periodo específico.
 meRouter.get(
   '/records/:period',

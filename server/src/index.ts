@@ -3,6 +3,7 @@ import cors from 'cors'
 import multer from 'multer'
 import { config } from './config.js'
 import { pool } from './db/pool.js'
+import { startScheduler } from './jobs/index.js'
 import { authRouter } from './routes/auth.js'
 import { meRouter } from './routes/me.js'
 import { documentsRouter } from './routes/documents.js'
@@ -51,6 +52,7 @@ console.log('[boot] Postgres SSL:', config.databaseSsl)
 // proveedor pueda alcanzar el contenedor.
 const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(`Mantelek API escuchando en 0.0.0.0:${config.port}`)
+  startScheduler()
 })
 
 // Un error al enlazar (puerto ocupado, permisos) debe verse en el log.

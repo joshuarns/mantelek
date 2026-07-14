@@ -31,4 +31,21 @@ export const config = {
     process.env.UPLOAD_DIR ?? 'uploads',
   ),
   maxUploadBytes: Number(process.env.MAX_UPLOAD_MB ?? 15) * 1024 * 1024,
+
+  // --- Notificaciones (Módulo 5) ---
+  // Si no hay API key, los recordatorios se registran como "simulado" en la
+  // bitácora en vez de enviarse. Así el sistema funciona sin credenciales.
+  resendApiKey: process.env.RESEND_API_KEY ?? '',
+  mailFrom: process.env.MAIL_FROM ?? 'Mantelek <onboarding@resend.dev>',
+  // Copia oculta a Mantelek de cada recordatorio (opcional).
+  mailBcc: process.env.MAIL_BCC ?? '',
+  // Pon "false" para desactivar el envío automático programado.
+  remindersEnabled: process.env.REMINDERS_ENABLED !== 'false',
+  // Zona horaria para el cron de recordatorios.
+  timezone: process.env.TZ_CRON ?? 'America/Mexico_City',
+  // URL del portal, para incluirla en los correos.
+  portalUrl: process.env.PORTAL_URL ?? 'https://mantelek.vercel.app',
+
+  // WhatsApp: preparado pero apagado hasta tener credenciales.
+  whatsappEnabled: process.env.WHATSAPP_ENABLED === 'true',
 }

@@ -54,6 +54,20 @@ export interface HistoryItem {
   completedAt: string | null
 }
 
+export type NotificationKind = 'dia_10' | 'dia_15' | 'dia_20' | 'completado'
+
+export interface NotificationDTO {
+  id: string
+  period: string
+  kind: NotificationKind
+  channel: 'email' | 'whatsapp'
+  subject: string | null
+  message: string
+  /** "enviado" | "simulado" (sin proveedor configurado aún) */
+  status: string
+  sentAt: string
+}
+
 export interface AdminStats {
   total: number
   cumplido: number

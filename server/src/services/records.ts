@@ -5,6 +5,7 @@ import {
   type PersonType,
 } from '../lib/documents.js'
 import { periodLabel } from '../lib/period.js'
+import { notifyCompleted } from './notifications.js'
 
 export interface DocumentRow {
   id: string
@@ -89,12 +90,20 @@ export async function refreshRecordStatus(recordId: string): Promise<void> {
   const docs = await getDocuments(recordId)
   const progress = computeProgress(docs)
   if (progress >= 100) {
-    await query(
+    const { rows } = await query<{ client_id: string; period: string }>(
       `UPDATE monthly_records
        SET status = 'cumplido', completed_at = COALESCE(completed_at, now())
-       WHERE id = $1`,
+       WHERE id = $1
+       RETURNING client_id, period`,
       [recordId],
     )
+    // Aviso de expediente completo (Módulo 5). Es idempotente: si ya se envió
+    // este periodo, no se repite. No debe romper la carga si el correo falla.
+    if (rows[0]) {
+      notifyCompleted(rows[0].client_id, rows[0].period).catch((err) =>
+        console.error('[notificaciones] aviso de completado:', err),
+      )
+    }
   } else {
     await query(
       `UPDATE monthly_records
