@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Loader2, X } from 'lucide-react'
+import { Check, Copy, KeyRound, Loader2, RefreshCw, X } from 'lucide-react'
 import { api } from '../../lib/api'
+import { generatePassword } from '../../lib/password'
 import type { AdminClient, PersonType } from '../../lib/apiTypes'
 
 const EMPTY = {
@@ -75,8 +76,31 @@ export function ClientForm({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Restablecer contraseña (solo en modo edición). Vacío = no cambiarla.
+  const [newPassword, setNewPassword] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  function regenerate() {
+    setNewPassword(generatePassword())
+    setCopied(false)
+  }
+
+  async function copyPassword() {
+    try {
+      await navigator.clipboard.writeText(newPassword)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* el portapapeles puede estar bloqueado; el valor sigue visible */
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault()
+    if (newPassword && newPassword.length < 8) {
+      setError('La nueva contraseña debe tener al menos 8 caracteres.')
+      return
+    }
     setSaving(true)
     setError(null)
     try {
@@ -93,6 +117,9 @@ export function ClientForm({
       }
       if (editing) {
         await api.put(`/admin/clients/${client!.id}`, payload)
+        if (newPassword) {
+          await api.patch(`/admin/clients/${client!.id}/password`, { password: newPassword })
+        }
       } else {
         await api.post('/admin/clients', { ...payload, user: f.user })
       }
@@ -178,6 +205,56 @@ export function ClientForm({
               <Field label="Correo de acceso" type="email" value={f.user.email} required onChange={(v) => setF({ ...f, user: { ...f.user, email: v } })} />
               <Field label="Contraseña" type="text" value={f.user.password} required placeholder="mín. 8 caracteres" onChange={(v) => setF({ ...f, user: { ...f.user, password: v } })} />
             </div>
+          </>
+        )}
+
+        {editing && (
+          <>
+            <p className="mt-5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <KeyRound size={13} /> Acceso al portal
+            </p>
+            {client!.userEmail && (
+              <p className="text-xs text-slate-500">
+                Inicia sesión con <span className="font-medium text-slate-700">{client!.userEmail}</span>.
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap items-end gap-2">
+              <label className="min-w-52 flex-1">
+                <span className="text-xs font-medium text-slate-600">Nueva contraseña</span>
+                <div className="mt-1 flex items-stretch overflow-hidden rounded-lg border border-slate-300 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20">
+                  <input
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value)
+                      setCopied(false)
+                    }}
+                    placeholder="Deja vacío para no cambiarla"
+                    className="min-w-0 flex-1 px-3 py-2 text-sm focus:outline-none"
+                  />
+                  {newPassword && (
+                    <button
+                      type="button"
+                      onClick={copyPassword}
+                      title="Copiar"
+                      className="flex items-center border-l border-slate-200 px-2.5 text-slate-500 hover:bg-slate-50"
+                    >
+                      {copied ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                    </button>
+                  )}
+                </div>
+              </label>
+              <button
+                type="button"
+                onClick={regenerate}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <RefreshCw size={14} /> Generar
+              </button>
+            </div>
+            <p className="mt-1.5 text-xs text-slate-400">
+              Al guardar se restablece la contraseña. Cópiala y compártela con el cliente: no se
+              vuelve a mostrar.
+            </p>
           </>
         )}
 
