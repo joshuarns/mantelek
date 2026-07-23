@@ -159,7 +159,9 @@ adminRouter.post(
       ])
       if (exists.rowCount) {
         await db.query('ROLLBACK')
-        return res.status(409).json({ error: 'Ya existe un usuario con ese correo' })
+        return res.status(409).json({
+          error: 'El correo de acceso ya está en uso por otro usuario. Usa uno distinto.',
+        })
       }
 
       const client = await db.query<{ id: string }>(
