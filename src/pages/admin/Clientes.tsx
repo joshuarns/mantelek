@@ -6,7 +6,7 @@ import { ClientForm } from '../../components/admin/ClientForm'
 import { ClientDetail } from '../../components/admin/ClientDetail'
 import { useFetch } from '../../hooks/useFetch'
 import { api } from '../../lib/api'
-import { formatDate } from '../../lib/format'
+import { formatDate, formatDateTime, timeAgo } from '../../lib/format'
 import type { AdminClient } from '../../lib/apiTypes'
 
 export function Clientes() {
@@ -135,8 +135,17 @@ export function Clientes() {
                 <dd className="text-right text-slate-700">{c.progress}%</dd>
                 <dt className="text-slate-400">Doc. pendientes</dt>
                 <dd className="text-right text-slate-700">{c.pending}</dd>
-                <dt className="text-slate-400">Último acceso</dt>
-                <dd className="text-right text-slate-700">{formatDate(c.lastAccessAt)}</dd>
+                <dt className="text-slate-400">Última conexión</dt>
+                <dd className="text-right text-slate-700">
+                  {c.lastAccessAt ? (
+                    <>
+                      {formatDateTime(c.lastAccessAt)}
+                      <span className="ml-1 text-xs text-slate-400">({timeAgo(c.lastAccessAt)})</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-400">Nunca ha entrado</span>
+                  )}
+                </dd>
                 <dt className="text-slate-400">Última carga</dt>
                 <dd className="text-right text-slate-700">{formatDate(c.lastUploadAt)}</dd>
               </dl>

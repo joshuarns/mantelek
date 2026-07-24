@@ -47,6 +47,22 @@ export function formatDateTime(iso?: string | null): string {
   })
 }
 
+/** Tiempo relativo en español: "hace 5 min", "hace 3 días", "ahora mismo". */
+export function timeAgo(iso?: string | null): string {
+  if (!iso) return 'Nunca'
+  const diff = Date.now() - new Date(iso).getTime()
+  const min = Math.floor(diff / 60000)
+  if (min < 1) return 'ahora mismo'
+  if (min < 60) return `hace ${min} min`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `hace ${h} h`
+  const d = Math.floor(h / 24)
+  if (d < 30) return `hace ${d} día${d !== 1 ? 's' : ''}`
+  const meses = Math.floor(d / 30)
+  if (meses < 12) return `hace ${meses} mes${meses !== 1 ? 'es' : ''}`
+  return `hace ${Math.floor(meses / 12)} año${Math.floor(meses / 12) !== 1 ? 's' : ''}`
+}
+
 export const STATUS_LABEL: Record<ComplianceStatus, string> = {
   cumplido: 'Cumplido',
   en_proceso: 'En proceso',
