@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Download, Eye, Info, Loader2, Upload } from 'lucide-react'
+import { CheckCircle2, Download, Eye, Info, Loader2, Trash2, Upload } from 'lucide-react'
 import { ProgressBar } from '../../components/ui/Progress'
 import { Loading, ErrorState } from '../../components/ui/States'
 import { useFetch } from '../../hooks/useFetch'
@@ -12,6 +12,7 @@ export function DocumentosDelMes() {
   const { data, loading, error, refetch } = useFetch<MeResponse>('/me')
   const [record, setRecord] = useState<RecordDTO | null>(null)
   const [uploading, setUploading] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const pendingType = useRef<string | null>(null)
@@ -46,6 +47,22 @@ export function DocumentosDelMes() {
       setUploadError(err instanceof Error ? err.message : 'No se pudo cargar el archivo')
     } finally {
       setUploading(null)
+    }
+  }
+
+  // Borra un documento cargado por error. Vuelve a quedar pendiente para
+  // que el cliente lo cargue de nuevo.
+  async function handleDelete(type: string, label: string) {
+    if (!confirm(`¿Eliminar "${label}"? Podrás volver a cargarlo.`)) return
+    setDeleting(type)
+    setUploadError(null)
+    try {
+      const updated = await api.del<RecordDTO>(`/documents/${period}/${type}`)
+      setRecord(updated)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'No se pudo eliminar el archivo')
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -120,6 +137,18 @@ export function DocumentosDelMes() {
                           >
                             <Download size={16} />
                           </button>
+                          <button
+                            onClick={() => handleDelete(d.type, d.label)}
+                            disabled={deleting === d.type}
+                            className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                            title="Eliminar y volver a cargar"
+                          >
+                            {deleting === d.type ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
+                          </button>
                         </>
                       ) : (
                         <button
@@ -148,7 +177,8 @@ export function DocumentosDelMes() {
 
         <div className="mt-4 flex items-center gap-2 rounded-lg bg-brand-500/5 p-3 text-sm text-brand-700">
           <Info size={16} />
-          Puedes ingresar las veces que necesites para completar tu documentación.
+          Puedes ingresar las veces que necesites. Si subiste un archivo por error, elimínalo con
+          la papelera y vuelve a cargarlo.
         </div>
       </div>
     </div>
